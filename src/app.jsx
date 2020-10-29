@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./app.module.css";
 import SearchHeader from "./components/search_header/search_header";
 import VideoDetail from "./components/video_detail/video_detail";
@@ -8,18 +8,25 @@ function App({ youtube }) {
   const [videos, setvideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  const search = (query) => {
-    setSelectedVideo(null);
-
-    youtube
-      .search(query) //
-      .then((videos) => {
-        setvideos(videos);
-      });
-  };
+  const search = useCallback(
+    (query) => {
+      setSelectedVideo(null);
+      youtube
+        .search(query) //
+        .then((items) => {
+          return items.map((item) => ({
+            ...item,
+            id: item.id.videoId,
+          }));
+        })
+        .then((videos) => {
+          setvideos(videos);
+        });
+    },
+    [youtube]
+  );
 
   const selectVideo = (video) => {
-    console.log("select");
     setSelectedVideo(video);
   };
 
